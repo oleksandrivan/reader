@@ -23,19 +23,19 @@ jobs:
         run: ./gradlew dockerBuildNative
 
       - name: Authenticate with Google Cloud
-        uses: 'google-github-actions/auth@v2'
+        uses: google-github-actions/auth@v2
         with:
           credentials_json: '${{ secrets.GCP_CREDENTIALS }}'
 
       - name: Setup Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@master
+        uses: google-github-actions/setup-gcloud@v2
 
       - name: Configure Docker
         run: gcloud auth configure-docker
 
       - name: Extract short SHA
         id: sha
-        run: echo "::set-output name=short::$(echo ${GITHUB_SHA::8})"
+        run: echo "::set-output name=short::$(echo ${GITHUB_SHA::7})"
 
       - name: Push Docker image - short commit
         run: docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/uoc/reader:${{ steps.sha.outputs.short }}

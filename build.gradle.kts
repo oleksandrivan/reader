@@ -1,5 +1,6 @@
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-import com.bmuschko.gradle.docker.tasks.image.DockerPushImage
+import org.gradle.process.ExecResult
+import java.io.ByteArrayOutputStream
 
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.9.22"
@@ -77,13 +78,17 @@ tasks.named<io.micronaut.gradle.docker.NativeImageDockerfile>("dockerfileNative"
 }
 
 tasks.named<DockerBuildImage>("dockerBuildNative") {
-    images.add("$registry/reader:latest")
+    val commitId = execCmd("git rev-parse --short HEAD")
+    images.set(listOf("$registry/reader:latest", "$registry/reader:$commitId"))
     platform.set("linux/amd64")
 }
 
-tasks.named<DockerPushImage>("dockerPushNative") {
-    dependsOn("dockerBuildNative")
-    images.set(listOf("$registry/reader:latest"))
+fun execCmd(command: String): String {
+    val stdOut = ByteArrayOutputStream()
+    project.exec {
+        commandLine = command.split(" ")
+        standardOutput = stdOut
+    }
+    return stdOut.toString().trim()
 }
-
 
